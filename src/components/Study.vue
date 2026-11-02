@@ -59,6 +59,7 @@
 import { ref, computed, onMounted, inject } from 'vue'
 import { Capacitor } from '@capacitor/core'
 import { Share } from '@capacitor/share'
+import { Filesystem, Directory } from '@capacitor/filesystem'
 import { store } from '../store.js'
 
 const props = defineProps({ mode: String, subject: Number, bank: Object })
@@ -147,21 +148,59 @@ function toggleFav(){
   else store.fav[q.value.id] = true
 }
 
+function abToBase64(buf){
+  const bytes = new Uint8Array(buf)
+  let binary = ''
+  const chunk = 0x8000
+  for(let i = 0; i < bytes.length; i += chunk){
+    binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk))
+  }
+  return btoa(binary)
+}
+
+// 把打包在 APK 内的题目图片先落到「可分享缓存目录」，返回 content:// URI
+async function getShareImageUri(imageRel){
+  const res = await fetch(imageRel)
+  if(!res.ok) return null
+  const buf = await res.arrayBuffer()
+  const base64 = abToBase64(buf)
+  const fname = 'share_' + imageRel.split('/').pop()
+  await Filesystem.writeFile({ path: 'share/' + fname, data: base64, directory: Directory.Cache, recursive: true })
+  const { uri } = await Filesystem.getUri({ path: 'share/' + fname, directory: Directory.Cache })
+  return uri
+}
+
 function askAI(){
   if(!q.value) return
   const ans = q.value.answer.split(',').map(s => s.trim())
   const ansText = ans.map(l => l + '.' + q.value.options[letters.indexOf(l)]).join('；')
   const optText = q.value.options.map((o, i) => letters[i] + '. ' + o).join('；')
   const text = `【驾考${props.subject === 1 ? '科目一' : '科目四'}·${typeLabel.value}】\n题目：${q.value.question}\n选项：${optText}\n正确答案：${ansText}\n请帮我用通俗的语言讲解这道题，并解释为什么选${q.value.answer}。`
+
   try{
-    // 1) 原生 APP（安卓）：调起系统分享面板，预填题目文本
+    // 1) 原生 APP（安卓）：调起系统分享面板，有图则连图一起带过去
     if(Capacitor.isNativePlatform()){
-      Share.share({ title: '驾考题目求讲解', text, dialogTitle: '转发给豆包 / 千问 讲解' })
+      let uri = null
+      if(q.value.image){ try{ uri = await getShareImageUri(q.value.image) }catch(e){ uri = null } }
+      const opts = { title: '驾考题目求讲解', text, dialogTitle: '转发给豆包 / 千问 讲解' }
+      if(uri) opts.files = [uri]
+      await Share.share(opts)
       return
     }
-    // 2) 浏览器（H5）：系统分享
+    // 2) 浏览器（H5）：尽量用 Web Share 带图，否则退化为纯文本
     if(navigator.share){
-      navigator.share({ title: '驾考题目求讲解', text }).catch(() => {})
+      try{
+        if(q.value.image && navigator.canShare){
+          const res = await fetch(q.value.image)
+          const blob = await res.blob()
+          const file = new File([blob], 'question.jpg', { type: 'image/jpeg' })
+          if(navigator.canShare({ files: [file] })){
+            await navigator.share({ title: '驾考题目求讲解', text, files: [file] })
+            return
+          }
+        }
+      }catch(e){ /* 落到纯文本分享 */ }
+      await navigator.share({ title: '驾考题目求讲解', text }).catch(() => {})
       return
     }
   }catch(e){ /* 用户取消分享：静默返回 */ }
