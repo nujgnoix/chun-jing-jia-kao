@@ -17,6 +17,7 @@
     "@capacitor/app": "^8.0.1",
     "@capacitor/cli": "^8.6.0",
     "@capacitor/core": "^8.6.0",
+    "@capacitor/filesystem": "^8.0.0",
     "@capacitor/share": "^8.0.3",
     "vue": "^3.4.21"
   },
