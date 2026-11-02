@@ -35,8 +35,20 @@ npx cap build android  # 产出 android/app/build/outputs/apk/debug/app-debug.ap
 或 `npx cap open android` 用 Android Studio 打开后运行（开启「未知来源安装」即可装到手机）。
 
 ## 题库说明
-题库来源于公开开源数据（科目一 2545 + 科目四 1833 题），答案已整理为字母格式。
+题库整理自公开开源数据，合计科目一 2545 题 + 科目四 1833 题，答案已统一整理为字母格式。
 考试以公安部最新官方题库为准；临考前建议用最新驾考 App 再刷一遍补漏。
 
+> 题库基于 2022 年法规整理，法规每年会有微调，请留意时效性。
+
+## 致谢（数据来源）
+本项目的题库与配图均来自以下开源项目与公开资源的无私分享，在此一并郑重感谢：
+
+- **科目一 / 科目四 题库文本**：[doupoa/DrivingTestSubjectOne](https://github.com/doupoa/DrivingTestSubjectOne)（`q.json` 同时包含科目一 2545 题与科目四 1833 题）。
+- **科目一 题库补充**：[AgentMystia/driving-test-subject1](https://github.com/AgentMystia/driving-test-subject1)（科目一专题目库）。
+- **科目四 题库备选**：[GaoJiasheng/driving-quiz-app](https://github.com/GaoJiasheng/driving-quiz-app)（其 `cn_subject4_v1.json` 作为科目四对照与备选来源）。
+- **题目配图**：车态联 CDN（`app.static.public.chetailian.com`，chetailian.com）提供的题目图片资源。
+
+没有以上开源作者与资源方的付出，就没有这份纯净、离线的题库。感谢他们！
+
 ## 开源声明
-本项目仅供学习交流，题库版权归原作者所有。
+本项目仅供学习交流，题库与配图的版权归原作者 / 原平台所有。如涉及授权问题，请联系我们删除。
