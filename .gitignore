@@ -1,0 +1,18 @@
+# 依赖
+node_modules/
+
+# 构建产物（本地 npm run build / vite 重新生成）
+dist/
+www/
+
+# Capacitor 安卓原生工程（在本地用 `npx cap add android` + `npx cap sync android` 重新生成）
+android/
+
+# 系统 / 编辑器
+.DS_Store
+*.local
+.vite/
+*.log
+
+# Vite 编译时产生的临时文件
+vite.config.js.timestamp-*.mjs
