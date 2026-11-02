@@ -170,7 +170,7 @@ async function getShareImageUri(imageRel){
   return uri
 }
 
-function askAI(){
+async function askAI(){
   if(!q.value) return
   const ans = q.value.answer.split(',').map(s => s.trim())
   const ansText = ans.map(l => l + '.' + q.value.options[letters.indexOf(l)]).join('；')
