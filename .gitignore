@@ -16,3 +16,6 @@ android/
 
 # Vite 编译时产生的临时文件
 vite.config.js.timestamp-*.mjs
+
+# 本地下载的 APK 产物（从 Release 获取，不入库）
+*.apk

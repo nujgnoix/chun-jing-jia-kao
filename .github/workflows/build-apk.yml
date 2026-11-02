@@ -51,6 +51,19 @@ jobs:
       - name: Add Android platform
         run: npx cap add android
 
+      - name: Make status bar white (match app)
+        run: |
+          python3 - <<'PY'
+          p='android/app/src/main/res/values/styles.xml'
+          s=open(p).read()
+          inject='        <item name="android:statusBarColor">#FFFFFF</item>\n        <item name="android:windowLightStatusBar">true</item>\n'
+          if 'statusBarColor' not in s:
+              s=s.replace('<item name="android:background">@null</item>',
+                          '<item name="android:background">@null</item>\n'+inject)
+          open(p,'w').write(s)
+          print('statusBarColor patched' if 'statusBarColor' in s else 'FAILED')
+          PY
+
       - name: Sync web assets
         run: npx cap sync android
 
