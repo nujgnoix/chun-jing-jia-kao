@@ -64,6 +64,34 @@ jobs:
           print('statusBarColor patched' if 'statusBarColor' in s else 'FAILED')
           PY
 
+      - name: Disable system font scaling in WebView (锁定APP内字号，不随老人模式/系统字体放大)
+        run: |
+          python3 - <<'PY'
+          import glob
+          files = glob.glob('android/app/src/main/java/**/MainActivity.java', recursive=True)
+          if not files:
+              print('MainActivity.java NOT FOUND'); raise SystemExit(1)
+          p = files[0]
+          s = open(p).read()
+          if 'setTextZoom' not in s:
+              if 'import android.os.Bundle;' not in s:
+                  s = s.replace('import com.getcapacitor.BridgeActivity;',
+                                'import com.getcapacitor.BridgeActivity;\nimport android.os.Bundle;')
+              s = s.replace(
+                  'public class MainActivity extends BridgeActivity {',
+                  'public class MainActivity extends BridgeActivity {\n'
+                  '    @Override\n'
+                  '    public void onCreate(Bundle savedInstanceState) {\n'
+                  '        super.onCreate(savedInstanceState);\n'
+                  '        getBridge().getWebView().getSettings().setTextZoom(100);\n'
+                  '    }'
+              )
+              open(p, 'w').write(s)
+              print('patched MainActivity: setTextZoom(100)')
+          else:
+              print('already patched')
+          PY
+
       - name: Sync web assets
         run: npx cap sync android
 
