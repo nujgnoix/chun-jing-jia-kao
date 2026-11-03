@@ -60,7 +60,7 @@ import { ref, computed, onMounted, inject } from 'vue'
 import { Capacitor } from '@capacitor/core'
 import { Share } from '@capacitor/share'
 import { Filesystem, Directory } from '@capacitor/filesystem'
-import { store } from '../store.js'
+import { store, adjustFont } from '../store.js'
 
 const props = defineProps({ mode: String, subject: Number, bank: Object })
 const emit = defineEmits(['back', 'home'])
@@ -336,5 +336,5 @@ function copy(text){
   else toast('已复制题目，去豆包/千问粘贴')
 }
 function onImgErr(e){ e.target.style.display = 'none' }
-function setFs(d){ store.fs = Math.min(32, Math.max(18, store.fs + d)); toast('字号 ' + store.fs) }
+function setFs(d){ const v = adjustFont(d); toast('字号 ' + v) }
 </script>
