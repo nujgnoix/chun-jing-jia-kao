@@ -6,12 +6,12 @@
   --line:#E0E0E0;
   --bg:#FFFFFF;
   --radius:14px;
-  --fs:24px;          /* 默认超大 */
-  --fs-title:28px;
+  --fs:18px;          /* 默认 18，系统字体放大由原生层锁定，不叠加 */
+  --fs-title:22px;
   --tap:60px;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html,body{margin:0;padding:0;background:#ECEFF3;font-family:-apple-system,"PingFang SC","Microsoft YaHei",Segoe UI,Roboto,sans-serif;color:var(--text);font-size:var(--fs);line-height:1.5;}
+html,body{margin:0;padding:0;background:#ECEFF3;font-family:-apple-system,"PingFang SC","Microsoft YaHei",Segoe UI,Roboto,sans-serif;color:var(--text);font-size:var(--fs);line-height:1.5;-webkit-text-size-adjust:100%;text-size-adjust:100%;}
 /* 适配安卓状态栏 / 刘海：用安全区域把内容整体下推，避免顶栏被系统状态栏压住 */
 .app{max-width:480px;margin:0 auto;min-height:100vh;background:var(--bg);box-shadow:0 0 0 1px #e5e7eb;display:flex;flex-direction:column;
   padding-top:env(safe-area-inset-top,0px);
@@ -43,6 +43,14 @@ html,body{margin:0;padding:0;background:#ECEFF3;font-family:-apple-system,"PingF
 .card .lab{font-size:var(--fs);font-weight:500;}
 .card .sub{font-size:14px;color:var(--muted);}
 .tip{margin-top:22px;font-size:15px;color:var(--muted);line-height:1.6;border-left:3px solid var(--primary);padding:8px 12px;background:var(--primary-soft);border-radius:0 8px 8px 0;}
+
+/* 首页字号调节条（固定尺寸，不随 --fs 变化，避免控件自身变形） */
+.fs-card{display:flex;align-items:center;gap:12px;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:18px 0;}
+.fs-card .lab{font-size:16px;color:var(--text);flex:0 0 auto;}
+.fs-card .ctrl{display:flex;align-items:center;gap:14px;margin-left:auto;}
+.fs-card button{border:1px solid var(--primary);background:var(--bg);color:var(--primary);border-radius:10px;width:46px;height:46px;font-size:18px;font-weight:500;cursor:pointer;line-height:1;}
+.fs-card button:active{background:var(--primary-soft);}
+.fs-card .val{font-size:16px;color:var(--muted);min-width:28px;text-align:center;}
 
 /* question */
 .q-head{display:flex;justify-content:space-between;align-items:center;font-size:15px;color:var(--muted);margin-bottom:12px;}
