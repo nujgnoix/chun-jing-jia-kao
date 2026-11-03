@@ -158,13 +158,132 @@ function abToBase64(buf){
   return btoa(binary)
 }
 
-// 把打包在 APK 内的题目图片先落到「可分享缓存目录」，返回 content:// URI
-async function getShareImageUri(imageRel){
-  const res = await fetch(imageRel)
+// ---------- 题目卡片图：把「文字 + 原图」合成到同一张图，根治「带图分享丢文字」----------
+function wrapText(ctx, text, maxWidth){
+  const lines = []
+  let line = ''
+  for(const ch of text){
+    const test = line + ch
+    if(ctx.measureText(test).width > maxWidth && line){
+      lines.push(line)
+      line = ch
+    } else {
+      line = test
+    }
+  }
+  if(line) lines.push(line)
+  return lines
+}
+
+async function loadLocalImage(src){
+  const res = await fetch(src)
   if(!res.ok) return null
-  const buf = await res.arrayBuffer()
-  const base64 = abToBase64(buf)
-  const fname = 'share_' + imageRel.split('/').pop()
+  const blob = await res.blob()
+  const dataUrl = await new Promise((resolve, reject) => {
+    const r = new FileReader()
+    r.onload = () => resolve(r.result)
+    r.onerror = reject
+    r.readAsDataURL(blob)
+  })
+  return await new Promise((resolve, reject) => {
+    const im = new Image()
+    im.onload = () => resolve(im)
+    im.onerror = reject
+    im.src = dataUrl
+  })
+}
+
+async function blobToBase64(blob){
+  if(blob.arrayBuffer){
+    const buf = await blob.arrayBuffer()
+    return abToBase64(buf)
+  }
+  return await new Promise((resolve, reject) => {
+    const r = new FileReader()
+    r.onload = () => resolve(r.result.split(',')[1])
+    r.onerror = reject
+    r.readAsDataURL(blob)
+  })
+}
+
+// 把题目（题干 + 选项 + 答案 + 解析 + 原图）渲染成一张 jpeg 图，返回 blob
+async function renderCardBlob(q, subject){
+  const W = 750, dpr = 2, pad = 44, lineH = 1.45
+  const mctx = document.createElement('canvas').getContext('2d')
+
+  const ans = q.answer.split(',').map(s => s.trim())
+  const ansText = ans.map(l => l + '. ' + q.options[letters.indexOf(l)]).join('\n')
+  const blocks = [
+    { text: `【驾考${subject === 1 ? '科目一' : '科目四'} · ${typeLabel.value}】`, size: 42, color: '#1565C0', bold: true },
+    { text: q.question, size: 38, color: '#1a1a1a', bold: false },
+    { text: q.options.map((o, i) => letters[i] + '. ' + o).join('\n'), size: 38, color: '#1a1a1a', bold: false },
+    { text: '正确答案：\n' + ansText, size: 38, color: '#2196F3', bold: true },
+  ]
+  if(q.explain) blocks.push({ text: '解析：' + q.explain, size: 34, color: '#555', bold: false })
+  blocks.push({ text: '请帮我用通俗的语言讲解这道题，并解释为什么选 ' + q.answer + '。', size: 34, color: '#555', bold: false })
+
+  // 测量文字总高度
+  let textH = pad * 2
+  const blockLines = []
+  for(const b of blocks){
+    mctx.font = `${b.bold ? 'bold ' : ''}${b.size}px sans-serif`
+    const innerW = W - pad * 2
+    const lines = []
+    for(const para of b.text.split('\n')){
+      lines.push(...wrapText(mctx, para, innerW))
+    }
+    blockLines.push({ ...b, lines })
+    textH += lines.length * (b.size * lineH) + 18
+  }
+
+  // 加载原图并算高度
+  let img = null, imgH = 0, imgScale = 1
+  if(q.image){
+    img = await loadLocalImage(q.image)
+    if(img){
+      const maxW = W - pad * 2
+      imgScale = Math.min(1, maxW / img.width)
+      imgH = img.height * imgScale
+      textH += imgH + 24
+    }
+  }
+
+  const H = Math.ceil(textH)
+  const canvas = document.createElement('canvas')
+  canvas.width = W * dpr
+  canvas.height = H * dpr
+  const ctx = canvas.getContext('2d')
+  ctx.scale(dpr, dpr)
+  ctx.fillStyle = '#ffffff'
+  ctx.fillRect(0, 0, W, H)
+
+  let y = pad
+  for(const bl of blockLines){
+    ctx.font = `${bl.bold ? 'bold ' : ''}${bl.size}px sans-serif`
+    ctx.fillStyle = bl.color
+    ctx.textBaseline = 'top'
+    const lh = bl.size * lineH
+    for(const line of bl.lines){
+      ctx.fillText(line, pad, y)
+      y += lh
+    }
+    y += 18
+  }
+  if(img){
+    ctx.drawImage(img, pad, y, img.width * imgScale, imgH)
+    y += imgH
+  }
+
+  return await new Promise((resolve, reject) => {
+    canvas.toBlob(b => b ? resolve(b) : reject(new Error('toBlob failed')), 'image/jpeg', 0.92)
+  })
+}
+
+// 原生安卓：卡片图写入缓存目录并返回可被其他 App 读取的 content:// URI
+async function buildCardUri(q, subject){
+  const blob = await renderCardBlob(q, subject)
+  const base64 = await blobToBase64(blob)
+  const fname = 'card_' + String(q.id).replace(/[^a-zA-Z0-9_-]/g, '_') + '.jpg'
   await Filesystem.writeFile({ path: 'share/' + fname, data: base64, directory: Directory.Cache, recursive: true })
   const { uri } = await Filesystem.getUri({ path: 'share/' + fname, directory: Directory.Cache })
   return uri
@@ -178,33 +297,38 @@ async function askAI(){
   const text = `【驾考${props.subject === 1 ? '科目一' : '科目四'}·${typeLabel.value}】\n题目：${q.value.question}\n选项：${optText}\n正确答案：${ansText}\n请帮我用通俗的语言讲解这道题，并解释为什么选${q.value.answer}。`
 
   try{
-    // 1) 原生 APP（安卓）：调起系统分享面板，有图则连图一起带过去
     if(Capacitor.isNativePlatform()){
-      let uri = null
-      if(q.value.image){ try{ uri = await getShareImageUri(q.value.image) }catch(e){ uri = null } }
-      const opts = { title: '驾考题目求讲解', text, dialogTitle: '转发给豆包 / 千问 讲解' }
-      if(uri) opts.files = [uri]
-      await Share.share(opts)
+      // 有图：把「题目文字 + 原图」合成一张卡片图，确保豆包/千问既能看图又能读到文字
+      if(q.value.image){
+        try{
+          const uri = await buildCardUri(q.value, props.subject)
+          if(uri){
+            await Share.share({ title: '驾考题目求讲解', text, files: [uri], dialogTitle: '转发给豆包 / 千问 讲解' })
+            return
+          }
+        }catch(e){ /* 合成失败则落到纯文本兜底 */ }
+      }
+      // 无图题 / 合成失败时：纯文本分享（已验证可用）
+      await Share.share({ title: '驾考题目求讲解', text, dialogTitle: '转发给豆包 / 千问 讲解' })
       return
     }
-    // 2) 浏览器（H5）：尽量用 Web Share 带图，否则退化为纯文本
+    // 浏览器（H5）：同样用卡片图（文字+原图合一），带图分享
     if(navigator.share){
       try{
-        if(q.value.image && navigator.canShare){
-          const res = await fetch(q.value.image)
-          const blob = await res.blob()
-          const file = new File([blob], 'question.jpg', { type: 'image/jpeg' })
-          if(navigator.canShare({ files: [file] })){
+        if(q.value.image){
+          const blob = await renderCardBlob(q.value, props.subject)
+          const file = new File([blob], 'question_card.jpg', { type: 'image/jpeg' })
+          if(navigator.canShare && navigator.canShare({ files: [file] })){
             await navigator.share({ title: '驾考题目求讲解', text, files: [file] })
             return
           }
         }
-      }catch(e){ /* 落到纯文本分享 */ }
+      }catch(e){ /* 落到纯文本 */ }
       await navigator.share({ title: '驾考题目求讲解', text }).catch(() => {})
       return
     }
   }catch(e){ /* 用户取消分享：静默返回 */ }
-  // 3) 不支持分享的环境：复制文本
+  // 不支持分享的环境：复制文本
   copy(text)
 }
 function copy(text){
