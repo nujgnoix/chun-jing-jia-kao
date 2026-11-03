@@ -9,6 +9,14 @@
         <button :class="{on:subject===1}" @click="$emit('update:subject',1)">科目一</button>
         <button :class="{on:subject===4}" @click="$emit('update:subject',4)">科目四</button>
       </div>
+      <div class="fs-card">
+        <span class="lab">字号</span>
+        <div class="ctrl">
+          <button @click="adjustFont(-2)" aria-label="缩小字号">A−</button>
+          <span class="val">{{ store.fs }}</span>
+          <button @click="adjustFont(2)" aria-label="放大字号">A+</button>
+        </div>
+      </div>
       <div class="grid">
         <button class="card" @click="$emit('nav',{view:'study',mode:'sequence'})">
           <span class="ic">▣</span><span class="lab">顺序练习</span>
@@ -34,7 +42,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { store } from '../store.js'
+import { store, adjustFont } from '../store.js'
 
 defineProps({ subject: Number })
 defineEmits(['update:subject', 'nav'])
