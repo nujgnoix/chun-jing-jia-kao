@@ -10,9 +10,9 @@
 
 ### 📥 Download the Android APK
 
-## [👉 Download the latest app-debug.apk (~57 MB)](https://github.com/nujgnoix/chun-jing-jia-kao/releases/latest/download/app-debug.apk)
+## [👉 Download app-debug.apk (v1.0, ~57 MB)](https://github.com/nujgnoix/chun-jing-jia-kao/releases/download/apk-24/app-debug.apk)
 
-[All releases](https://github.com/nujgnoix/chun-jing-jia-kao/releases) · [Latest release page](https://github.com/nujgnoix/chun-jing-jia-kao/releases/latest)
+[Latest release](https://github.com/nujgnoix/chun-jing-jia-kao/releases/latest) · [All releases](https://github.com/nujgnoix/chun-jing-jia-kao/releases)
 
 > This is an **Android application (.apk)** — not a website and not an iOS app.
 > Enable "install from unknown sources" on your phone. Builds are currently debug-signed.
