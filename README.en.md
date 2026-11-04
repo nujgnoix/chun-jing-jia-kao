@@ -10,10 +10,9 @@
 
 ### 📥 Download the Android APK
 
-<a href="https://github.com/nujgnoix/chun-jing-jia-kao/releases/latest"><img src="https://img.shields.io/badge/⬇%20Download%20Latest%20APK-2196F3?style=for-the-badge&logo=android&logoColor=white" alt="Download latest APK"></a>
-<a href="https://github.com/nujgnoix/chun-jing-jia-kao/releases"><img src="https://img.shields.io/badge/All%20releases-lightgrey?style=for-the-badge" alt="All releases"></a>
+## [👉 Download the latest app-debug.apk (~57 MB)](https://github.com/nujgnoix/chun-jing-jia-kao/releases/latest/download/app-debug.apk)
 
-**Direct download:** [app-debug.apk (latest, ~57 MB)](https://github.com/nujgnoix/chun-jing-jia-kao/releases/latest/download/app-debug.apk)
+[All releases](https://github.com/nujgnoix/chun-jing-jia-kao/releases) · [Latest release page](https://github.com/nujgnoix/chun-jing-jia-kao/releases/latest)
 
 > This is an **Android application (.apk)** — not a website and not an iOS app.
 > Enable "install from unknown sources" on your phone. Builds are currently debug-signed.
@@ -48,9 +47,9 @@ This app started as a small gift for a 60-year-old family member preparing for t
 | :---: | :---: |
 | ![Mock exam](screenshots/03-exam.png) | ![Answer sheet](screenshots/04-answer-sheet.png) |
 
-<table>
-<tr><td align="center"><b>Ask an AI to explain</b><br><img src="screenshots/05-ask-ai.png" width="280" alt="Question card shared as an image"><br><sub>Question text and the original image are composed into one card, shared to Doubao / Qwen</sub></td></tr>
-</table>
+**Ask an AI to explain**: the question text and the original image are composed into a single card, shared to Doubao / Qwen.
+
+![Question card shared as an image](screenshots/05-ask-ai.png)
 
 ## Features
 
