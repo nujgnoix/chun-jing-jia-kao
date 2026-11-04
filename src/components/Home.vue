@@ -3,7 +3,6 @@
     <div class="body">
       <div class="hero">
         <h1>纯净驾考</h1>
-        <p>无广告 · 不充值 · 不分享 · 大字号</p>
       </div>
       <div class="switch">
         <button :class="{on:subject===1}" @click="$emit('update:subject',1)">科目一</button>
@@ -35,7 +34,7 @@
           <span class="sub">{{ favCount }} 道</span>
         </button>
       </div>
-      <p class="tip">遇到不会的题，点「问 AI 讲解」一键转发给豆包 / 千问。</p>
+      <p class="tip">不会的题，答完可以点「问 AI 讲解」问豆包 / 千问。</p>
     </div>
   </div>
 </template>
