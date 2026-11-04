@@ -15,6 +15,7 @@ html,body{margin:0;padding:0;background:#ECEFF3;font-family:-apple-system,"PingF
 /* 适配安卓状态栏 / 刘海：用安全区域把内容整体下推，避免顶栏被系统状态栏压住 */
 .app{max-width:480px;margin:0 auto;min-height:100vh;background:var(--bg);box-shadow:0 0 0 1px #e5e7eb;display:flex;flex-direction:column;
   padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
   padding-left:env(safe-area-inset-left,0px);
   padding-right:env(safe-area-inset-right,0px);}
 .screen{flex:1;display:flex;flex-direction:column;min-height:0;}
@@ -24,16 +25,15 @@ html,body{margin:0;padding:0;background:#ECEFF3;font-family:-apple-system,"PingF
 .topbar{height:58px;flex:0 0 58px;display:flex;align-items:center;gap:8px;padding:0 14px;border-bottom:1px solid var(--line);background:var(--bg);}
 .back{border:none;background:none;color:var(--primary);font-size:var(--fs);cursor:pointer;padding:6px 4px;}
 .title{flex:1;text-align:center;font-size:var(--fs-title);font-weight:500;}
-.fsctl{display:flex;gap:6px;}
-.fsctl button{border:1px solid var(--line);background:var(--bg);color:var(--muted);border-radius:8px;padding:6px 10px;font-size:15px;cursor:pointer;}
+.fsctl{display:flex;gap:8px;}
+.fsctl button{min-width:44px;height:42px;border:1px solid var(--line);background:var(--bg);color:var(--muted);border-radius:10px;padding:0 10px;font-size:16px;cursor:pointer;}
 
-.body{flex:1;overflow:auto;padding:18px 16px 28px;}
+.body{flex:1;overflow:auto;padding:20px 16px 24px;}
 
 /* home */
-.hero{padding:8px 2px 10px;}
-.hero h1{font-size:30px;font-weight:500;margin:0 0 6px;}
-.hero p{font-size:var(--fs);color:var(--muted);margin:0;}
-.switch{display:flex;background:var(--primary-soft);border-radius:999px;padding:4px;margin:18px 0 20px;}
+.hero{padding:10px 2px 4px;}
+.hero h1{font-size:30px;font-weight:500;margin:0;}
+.switch{display:flex;background:var(--primary-soft);border-radius:999px;padding:4px;margin:20px 0 18px;}
 .switch button{flex:1;border:none;background:none;height:46px;border-radius:999px;font-size:var(--fs);color:var(--muted);cursor:pointer;}
 .switch button.on{background:var(--primary);color:#fff;font-weight:500;}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
@@ -42,7 +42,7 @@ html,body{margin:0;padding:0;background:#ECEFF3;font-family:-apple-system,"PingF
 .card .ic{font-size:26px;color:var(--primary);}
 .card .lab{font-size:var(--fs);font-weight:500;}
 .card .sub{font-size:14px;color:var(--muted);}
-.tip{margin-top:22px;font-size:15px;color:var(--muted);line-height:1.6;border-left:3px solid var(--primary);padding:8px 12px;background:var(--primary-soft);border-radius:0 8px 8px 0;}
+.tip{margin-top:20px;font-size:14px;color:var(--muted);line-height:1.6;text-align:center;}
 
 /* 首页字号调节条（固定尺寸，不随 --fs 变化，避免控件自身变形） */
 .fs-card{display:flex;align-items:center;gap:12px;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:18px 0;}
@@ -56,7 +56,7 @@ html,body{margin:0;padding:0;background:#ECEFF3;font-family:-apple-system,"PingF
 .q-head{display:flex;justify-content:space-between;align-items:center;font-size:15px;color:var(--muted);margin-bottom:12px;}
 .q-type{display:inline-block;font-size:13px;color:var(--primary);border:1px solid var(--primary);border-radius:6px;padding:2px 9px;}
 .q-title{font-size:var(--fs-title);line-height:1.5;margin:0 0 16px;}
-.q-img{width:100%;border-radius:10px;margin-bottom:16px;background:#f5f5f5;display:block;max-height:220px;object-fit:contain;}
+.q-img{width:100%;border-radius:10px;margin-bottom:16px;background:#f5f5f5;display:block;max-height:280px;object-fit:contain;}
 .options{display:flex;flex-direction:column;gap:12px;}
 .opt{border:1px solid var(--line);border-radius:12px;padding:16px 14px;font-size:var(--fs);display:flex;gap:12px;align-items:flex-start;cursor:pointer;background:var(--bg);min-height:var(--tap);}
 .opt .tag{flex:0 0 30px;height:30px;border-radius:50%;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--muted);}
@@ -75,14 +75,15 @@ html,body{margin:0;padding:0;background:#ECEFF3;font-family:-apple-system,"PingF
 .fb-bar.ok{color:var(--primary);}
 .fb-bar.no{color:var(--text);}
 .explain{font-size:var(--fs);color:var(--muted);line-height:1.6;background:#FAFAFA;border-radius:10px;padding:12px 14px;}
-.ai-btn{margin-top:16px;width:100%;height:var(--tap);border:none;border-radius:12px;background:var(--primary);color:#fff;font-size:var(--fs);font-weight:500;cursor:pointer;}
-.fav-row{display:flex;gap:10px;margin-top:16px;}
-.fav{flex:1;height:var(--tap);border:1px solid var(--line);border-radius:12px;background:var(--bg);font-size:var(--fs);color:var(--text);cursor:pointer;}
-.fav.on{background:var(--primary-soft);color:var(--primary);border-color:var(--primary);}
-.nav{height:var(--tap);border:1px solid var(--line);border-radius:12px;background:var(--bg);font-size:var(--fs);color:var(--text);cursor:pointer;}
-.nav.primary{background:var(--primary);color:#fff;border-color:var(--primary);}
-.nav-row{display:flex;gap:12px;margin-top:18px;}
-.nav-row .nav{flex:1;}
+.ai-btn{margin-top:16px;width:100%;height:var(--tap);border:1px solid var(--primary);border-radius:12px;background:var(--primary-soft);color:var(--primary);font-size:var(--fs);font-weight:500;cursor:pointer;}
+
+/* 固定底栏：翻页/收藏常驻，长解析也无需滚动；三按钮等宽，靠颜色区分主次 */
+.actionbar{flex:0 0 auto;display:flex;gap:10px;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);background:var(--bg);}
+.actionbar button{flex:1;min-width:0;height:var(--tap);border-radius:12px;font-size:var(--fs);cursor:pointer;white-space:nowrap;}
+.actionbar .fav{border:1px solid var(--line);background:var(--bg);color:var(--muted);}
+.actionbar .fav.on{background:var(--primary-soft);color:var(--primary);border-color:var(--primary);}
+.actionbar .nav{border:1px solid var(--line);background:var(--bg);color:var(--text);}
+.actionbar .nav.primary{background:var(--primary);color:#fff;border-color:var(--primary);font-weight:500;}
 
 .empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;color:var(--muted);}
 .back-home{height:var(--tap);padding:0 28px;border:none;border-radius:12px;background:var(--primary);color:#fff;font-size:var(--fs);cursor:pointer;}
@@ -103,8 +104,9 @@ html,body{margin:0;padding:0;background:#ECEFF3;font-family:-apple-system,"PingF
 .sheet{background:#fff;border-radius:16px;width:80%;max-width:320px;padding:24px;text-align:center;}
 .sheet .score{font-size:52px;font-weight:500;color:var(--muted);}
 .sheet .score.pass{color:var(--primary);}
-.sheet .tip{font-size:var(--fs);color:var(--muted);margin:10px 0 20px;}
+.sheet .tip{font-size:var(--fs);color:var(--muted);margin:10px 0 20px;line-height:1.6;}
 .sheet button{width:100%;height:var(--tap);border:none;border-radius:12px;background:var(--primary);color:#fff;font-size:var(--fs);cursor:pointer;}
+.sheet button.ghost{margin-top:10px;background:var(--bg);color:var(--muted);border:1px solid var(--line);}
 
 .toast{position:fixed;left:50%;bottom:48px;transform:translateX(-50%);background:rgba(0,0,0,.8);color:#fff;padding:10px 18px;border-radius:999px;font-size:15px;z-index:50;max-width:80%;text-align:center;opacity:0;transition:opacity .2s;pointer-events:none;}
 .toast.show{opacity:1;}
