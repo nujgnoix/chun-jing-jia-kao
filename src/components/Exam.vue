@@ -3,7 +3,7 @@
     <div class="exam-top">
       <button class="back" @click="$emit('back')">‹ 退出</button>
       <div class="timer" :class="{ warn: timeLeft <= 60 }">{{ fmt(timeLeft) }}</div>
-      <button class="submit" @click="submit">交卷</button>
+      <button class="submit" @click="askSubmit">交卷</button>
     </div>
 
     <div class="body" v-if="q">
@@ -34,6 +34,14 @@
       </div>
     </div>
 
+    <div class="mask" :class="{ show: showConfirm }">
+      <div class="sheet">
+        <div class="tip">确定要交卷吗？交卷后不能修改答案。</div>
+        <button @click="doSubmit">确定交卷</button>
+        <button class="ghost" @click="showConfirm = false">继续答题</button>
+      </div>
+    </div>
+
     <div class="mask" :class="{ show: showResult }">
       <div class="sheet">
         <div class="score" :class="{ pass: score >= 90 }">{{ score }}</div>
@@ -58,6 +66,7 @@ const answers = ref({})       // id -> [letters]
 const timeLeft = ref(props.subject === 1 ? 45 * 60 : 30 * 60)
 let timer = null
 const showResult = ref(false)
+const showConfirm = ref(false)
 const score = ref(0)
 
 const q = computed(() => list.value[idx.value] || null)
@@ -107,6 +116,8 @@ function onPick(i){
   answers.value = { ...answers.value }
 }
 function jump(i){ idx.value = i }
+function askSubmit(){ showConfirm.value = true }
+function doSubmit(){ showConfirm.value = false; submit() }
 function submit(){
   clearInterval(timer)
   let right = 0
