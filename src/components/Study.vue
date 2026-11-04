@@ -9,7 +9,7 @@
       </div>
     </div>
 
-    <div class="body" v-if="q">
+    <div class="body" ref="bodyEl" v-if="q">
       <div class="q-head">
         <span class="q-type">{{ typeLabel }}</span>
         <span class="q-idx">{{ idx + 1 }} / {{ list.length }}</span>
@@ -32,19 +32,10 @@
         <button class="confirm" @click="evaluate">确认答案</button>
       </div>
 
-      <div v-if="answered" class="feedback">
-        <div class="fb-bar" :class="correct ? 'ok' : 'no'">{{ correct ? '✓ 回答正确' : '✗ 回答错误（正确答案已标蓝）' }}</div>
+      <div v-if="answered" ref="feedbackEl" class="feedback">
+        <div class="fb-bar" :class="correct ? 'ok' : 'no'">{{ correct ? '✓ 回答正确' : '✗ 回答错误' }}</div>
         <div class="explain" v-if="q.explain"><b>解析：</b>{{ q.explain }}</div>
-        <button class="ai-btn" @click="askAI">问 AI 讲解（转发豆包 / 千问）</button>
-        <div class="fav-row">
-          <button class="fav" :class="{on: isFav}" @click="toggleFav">{{ isFav ? '★ 已收藏' : '☆ 收藏' }}</button>
-          <button class="nav" @click="prev">上一题</button>
-          <button class="nav primary" @click="next">下一题</button>
-        </div>
-      </div>
-      <div v-else class="nav-row">
-        <button class="nav" @click="prev">上一题</button>
-        <button class="nav primary" @click="next">下一题</button>
+        <button class="ai-btn" @click="askAI">问 AI 讲解</button>
       </div>
     </div>
 
@@ -52,11 +43,17 @@
       <p>{{ emptyText }}</p>
       <button class="back-home" @click="$emit('home')">返回首页</button>
     </div>
+
+    <div v-if="q" class="actionbar">
+      <button v-if="answered" class="fav" :class="{on: isFav}" @click="toggleFav">{{ isFav ? '★ 已收藏' : '☆ 收藏' }}</button>
+      <button class="nav" @click="prev">上一题</button>
+      <button class="nav primary" @click="next">下一题</button>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, inject } from 'vue'
+import { ref, computed, onMounted, inject, nextTick } from 'vue'
 import { Capacitor } from '@capacitor/core'
 import { Share } from '@capacitor/share'
 import { Filesystem, Directory } from '@capacitor/filesystem'
@@ -72,6 +69,8 @@ const idx = ref(0)
 const sel = ref([])
 const answered = ref(false)
 const correct = ref(false)
+const feedbackEl = ref(null)
+const bodyEl = ref(null)
 
 const q = computed(() => list.value[idx.value] || null)
 const typeLabel = computed(() => ({ single: '单选题', multiple: '多选题', judge: '判断题' }[q.value?.type] || ''))
@@ -96,6 +95,8 @@ function reset(){
   sel.value = []
   answered.value = false
   correct.value = false
+  // 切题后回到题干顶部，避免停在上一题的解析处
+  nextTick(() => { if(bodyEl.value) bodyEl.value.scrollTop = 0 })
 }
 function prev(){ if(idx.value > 0){ idx.value--; reset() } }
 function next(){
@@ -127,6 +128,8 @@ function evaluate(){
   // 答错进错题本，答对则移出错题本
   if(ok) delete store.wrong[q.value.id]
   else store.wrong[q.value.id] = true
+  // 答完题把「判分 + 解析 + 问 AI」滚进视野，老人不用自己往下找
+  nextTick(() => feedbackEl.value?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }))
 }
 
 function optClass(i){
@@ -296,44 +299,29 @@ async function askAI(){
   const optText = q.value.options.map((o, i) => letters[i] + '. ' + o).join('；')
   const text = `【驾考${props.subject === 1 ? '科目一' : '科目四'}·${typeLabel.value}】\n题目：${q.value.question}\n选项：${optText}\n正确答案：${ansText}\n请帮我用通俗的语言讲解这道题，并解释为什么选${q.value.answer}。`
 
+  // 只调起一次分享面板；失败/取消一律静默返回，绝不写剪贴板、也不重试第二次
   try{
     if(Capacitor.isNativePlatform()){
-      // 有图：把「题目文字 + 原图」合成一张卡片图，确保豆包/千问既能看图又能读到文字
+      let opts = { title: '驾考题目求讲解', text, dialogTitle: '转发给豆包 / 千问 讲解' }
+      // 有图：把「题目文字 + 原图」合成一张卡片图
       if(q.value.image){
-        try{
-          const uri = await buildCardUri(q.value, props.subject)
-          if(uri){
-            await Share.share({ title: '驾考题目求讲解', text, files: [uri], dialogTitle: '转发给豆包 / 千问 讲解' })
-            return
-          }
-        }catch(e){ /* 合成失败则落到纯文本兜底 */ }
+        const uri = await buildCardUri(q.value, props.subject)   // 失败会抛出，交给外层统一处理
+        opts.files = [uri]
       }
-      // 无图题 / 合成失败时：纯文本分享（已验证可用）
-      await Share.share({ title: '驾考题目求讲解', text, dialogTitle: '转发给豆包 / 千问 讲解' })
+      await Share.share(opts)
       return
     }
-    // 浏览器（H5）：同样用卡片图（文字+原图合一），带图分享
+    // 浏览器（H5）
     if(navigator.share){
-      try{
-        if(q.value.image){
-          const blob = await renderCardBlob(q.value, props.subject)
-          const file = new File([blob], 'question_card.jpg', { type: 'image/jpeg' })
-          if(navigator.canShare && navigator.canShare({ files: [file] })){
-            await navigator.share({ title: '驾考题目求讲解', text, files: [file] })
-            return
-          }
-        }
-      }catch(e){ /* 落到纯文本 */ }
-      await navigator.share({ title: '驾考题目求讲解', text }).catch(() => {})
-      return
+      const opts = { title: '驾考题目求讲解', text }
+      if(q.value.image){
+        const blob = await renderCardBlob(q.value, props.subject)
+        const file = new File([blob], 'question_card.jpg', { type: 'image/jpeg' })
+        if(!navigator.canShare || navigator.canShare({ files: [file] })) opts.files = [file]
+      }
+      await navigator.share(opts)
     }
-  }catch(e){ /* 用户取消分享：静默返回 */ }
-  // 不支持分享的环境：复制文本
-  copy(text)
-}
-function copy(text){
-  if(navigator.clipboard) navigator.clipboard.writeText(text).then(() => toast('已复制，去豆包/千问粘贴')).catch(() => toast('已复制题目'))
-  else toast('已复制题目，去豆包/千问粘贴')
+  }catch(e){ /* 用户取消或分享失败：静默返回，保持题目页面不变 */ }
 }
 function onImgErr(e){ e.target.style.display = 'none' }
 function setFs(d){ const v = adjustFont(d); toast('字号 ' + v) }
