@@ -10,9 +10,9 @@
 
 ### 📥 下载安卓 APK
 
-## [👉 点此下载最新版 app-debug.apk（约 57 MB）](https://github.com/nujgnoix/chun-jing-jia-kao/releases/latest/download/app-debug.apk)
+## [👉 点此下载 app-debug.apk（v1.0，约 57 MB）](https://github.com/nujgnoix/chun-jing-jia-kao/releases/download/apk-24/app-debug.apk)
 
-[查看全部版本 / Releases](https://github.com/nujgnoix/chun-jing-jia-kao/releases) · [下载按钮（badge）](https://github.com/nujgnoix/chun-jing-jia-kao/releases/latest)
+[最新版入口](https://github.com/nujgnoix/chun-jing-jia-kao/releases/latest) · [Releases 页面](https://github.com/nujgnoix/chun-jing-jia-kao/releases)
 
 > 这是 **Android 应用（.apk）**，不是网页，也不是 iOS 应用。
 > 安装时需在手机设置里允许「未知来源安装」；当前为 debug 签名版本。
