@@ -10,10 +10,9 @@
 
 ### 📥 下载安卓 APK
 
-<a href="https://github.com/nujgnoix/chun-jing-jia-kao/releases/latest"><img src="https://img.shields.io/badge/⬇%20下载最新版%20APK-2196F3?style=for-the-badge&logo=android&logoColor=white" alt="下载最新版 APK"></a>
-<a href="https://github.com/nujgnoix/chun-jing-jia-kao/releases"><img src="https://img.shields.io/badge/查看全部版本-lightgrey?style=for-the-badge" alt="查看全部版本"></a>
+## [👉 点此下载最新版 app-debug.apk（约 57 MB）](https://github.com/nujgnoix/chun-jing-jia-kao/releases/latest/download/app-debug.apk)
 
-**直接下载：** [app-debug.apk（最新版，约 57 MB）](https://github.com/nujgnoix/chun-jing-jia-kao/releases/latest/download/app-debug.apk)
+[查看全部版本 / Releases](https://github.com/nujgnoix/chun-jing-jia-kao/releases) · [下载按钮（badge）](https://github.com/nujgnoix/chun-jing-jia-kao/releases/latest)
 
 > 这是 **Android 应用（.apk）**，不是网页，也不是 iOS 应用。
 > 安装时需在手机设置里允许「未知来源安装」；当前为 debug 签名版本。
@@ -48,9 +47,9 @@
 | :---: | :---: |
 | ![模拟考试](screenshots/03-exam.png) | ![答题卡](screenshots/04-answer-sheet.png) |
 
-<table>
-<tr><td align="center"><b>一键问 AI 讲解</b><br><img src="screenshots/05-ask-ai.png" width="280" alt="分享题目卡片图"><br><sub>题目文字 + 原图合成一张卡片图，转发给豆包 / 千问</sub></td></tr>
-</table>
+**一键问 AI 讲解**：把题目文字 + 原图合成一张卡片图，转发给豆包 / 千问。
+
+![分享题目卡片图](screenshots/05-ask-ai.png)
 
 ## 功能
 
