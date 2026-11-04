@@ -26,6 +26,43 @@ jobs:
       - name: Install npm dependencies
         run: npm install
 
+      - name: Patch Share plugin to open target app in its own task
+        run: |
+          python3 - <<'PY'
+          p = 'node_modules/@capacitor/share/android/src/main/java/com/capacitorjs/plugins/share/SharePlugin.java'
+          s = open(p).read()
+          old = '''            Intent chooser = Intent.createChooser(intent, dialogTitle, pi.getIntentSender());
+            chosenComponent = null;
+            chooser.addCategory(Intent.CATEGORY_DEFAULT);
+            stopped = false;
+            isPresenting = true;
+            startActivityForResult(call, chooser, "activityResult");'''
+          new = '''            // 让被分享的 App 在独立任务栈打开：返回一次即可回到驾考，
+            // 且最近任务里驾考与豆包/千问是两张独立卡片，不会互相顶替。
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            Intent chooser = Intent.createChooser(intent, dialogTitle, pi.getIntentSender());
+            chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            chosenComponent = null;
+            chooser.addCategory(Intent.CATEGORY_DEFAULT);
+            stopped = false;
+            try {
+                getContext().startActivity(chooser);
+                JSObject result = new JSObject();
+                result.put("activityType", "");
+                call.resolve(result);
+            } catch (Exception ex) {
+                call.reject(ex.getLocalizedMessage());
+            }
+            isPresenting = false;'''
+          if old in s:
+              open(p, 'w').write(s.replace(old, new))
+              print('patched SharePlugin: independent task + immediate resolve')
+          elif 'independent task' in s:
+              print('already patched')
+          else:
+              print('WARN: pattern not found, skip patch')
+          PY
+
       - name: Build web assets (www)
         run: npx vite build --outDir www
 
