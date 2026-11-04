@@ -83,17 +83,27 @@ jobs:
                   '    @Override\n'
                   '    public void onCreate(Bundle savedInstanceState) {\n'
                   '        super.onCreate(savedInstanceState);\n'
-                  '        getBridge().getWebView().getSettings().setTextZoom(100);\n'
+                  '        lockTextZoom();\n'
+                  '    }\n'
+                  '    @Override\n'
+                  '    public void onResume() {\n'
+                  '        super.onResume();\n'
+                  '        lockTextZoom();\n'
+                  '    }\n'
+                  '    private void lockTextZoom() {\n'
+                  '        if (getBridge() != null && getBridge().getWebView() != null) {\n'
+                  '            getBridge().getWebView().getSettings().setTextZoom(100);\n'
+                  '        }\n'
                   '    }'
               )
               open(p, 'w').write(s)
-              print('patched MainActivity: setTextZoom(100)')
+              print('patched MainActivity: setTextZoom(100) via onCreate+onResume')
           else:
               print('already patched')
           PY
 
-      - name: Sync web assets
-        run: npx cap sync android
+      - name: Sync web assets (copy only, 不重建原生工程以免覆盖 MainActivity patch)
+        run: npx cap copy android
 
       - name: Make gradlew executable
         run: chmod +x android/gradlew
