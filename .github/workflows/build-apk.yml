@@ -126,11 +126,26 @@ jobs:
           name: chun-jing-jia-kao-apk
           path: android/app/build/outputs/apk/debug/*.apk
 
+      - name: Delete previous rolling release (keep one clean download entry)
+        run: gh release delete latest --cleanup-tag --yes 2>/dev/null || true
+        env:
+          GH_TOKEN: ${{ github.token }}
+
       - name: Publish APK to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: apk-${{ github.run_number }}
-          name: 纯净驾考 APK（自动构建 #${{ github.run_number }}）
+          tag_name: latest
+          name: 纯净驾考 · 最新版 Android APK
+          body: |
+            ## 纯净驾考（Android）
+
+            **直接下载下方 `app-debug.apk` 即可安装。**
+
+            - 科目一 / 科目四，大字适老、无广告、完全离线
+            - 安装时需允许「未知来源」；当前为 debug 签名
+            - 每次代码构建自动滚动更新本 Release，因此这里始终是最新版
+
+            题库与配图来自第三方，授权说明见 [NOTICE.md](https://github.com/nujgnoix/chun-jing-jia-kao/blob/main/NOTICE.md)。
           make_latest: true
           files: android/app/build/outputs/apk/debug/*.apk
         env:
