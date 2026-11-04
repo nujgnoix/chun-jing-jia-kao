@@ -4,6 +4,11 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
+    # 纯文档/截图改动不触发 APK 构建，避免 Releases 堆积重复包
+    paths-ignore:
+      - '**/*.md'
+      - 'LICENSE'
+      - 'screenshots/**'
 
 permissions:
   contents: write
