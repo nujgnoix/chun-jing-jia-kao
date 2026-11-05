@@ -4,10 +4,15 @@ const KEY = 'jiaxiao_v1'
 const saved = JSON.parse(localStorage.getItem(KEY) || '{}')
 
 // wrong / fav 存题目 id；fs 为字体大小（默认 18px，可在 14~30 之间调节）
+// subject：当前科目（1=科目一 / 4=科目四）；lastView：上次所在页面，重开直接回到该页
+// studyIdx：按「模式-科目」记住看到第几题（如 { 'sequence-1': 9 } 表示科目一顺序练习看到第 10 题）
 export const store = reactive({
   wrong: saved.wrong || {},
   fav: saved.fav || {},
-  fs: saved.fs || 18
+  fs: saved.fs || 18,
+  subject: saved.subject || 1,
+  lastView: saved.lastView || { view: 'home', mode: 'sequence' },
+  studyIdx: saved.studyIdx || {}
 })
 
 // 字号调节：限制在 14~30px，避免叠加系统/老人模式放大导致布局错乱
@@ -17,9 +22,24 @@ export function adjustFont(delta){
   return v
 }
 
+// 记住某模式+科目下看到第几题
+export function setProgress(mode, subject, idx){
+  store.studyIdx[mode + '-' + subject] = idx
+}
+export function getProgress(mode, subject){
+  const v = store.studyIdx[mode + '-' + subject]
+  return typeof v === 'number' ? v : 0
+}
+
 watch(
-  () => JSON.stringify({ wrong: store.wrong, fav: store.fav, fs: store.fs }),
+  () => JSON.stringify({
+    wrong: store.wrong, fav: store.fav, fs: store.fs,
+    subject: store.subject, lastView: store.lastView, studyIdx: store.studyIdx
+  }),
   () => {
-    localStorage.setItem(KEY, JSON.stringify({ wrong: store.wrong, fav: store.fav, fs: store.fs }))
+    localStorage.setItem(KEY, JSON.stringify({
+      wrong: store.wrong, fav: store.fav, fs: store.fs,
+      subject: store.subject, lastView: store.lastView, studyIdx: store.studyIdx
+    }))
   }
 )
