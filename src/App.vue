@@ -20,7 +20,7 @@ import Exam from './components/Exam.vue'
 import { store } from './store.js'
 
 const bank = reactive({ '1': [], '4': [] })
-const subject = ref(1)
+const subject = ref(store.subject || 1)
 const studyMode = ref('sequence')
 const loaded = ref(false)
 const toastMsg = ref('')
@@ -30,6 +30,13 @@ let toastTimer = null
 // 导航栈：首页为栈底，子页面入栈；返回键 / 边缘左滑走页内返回
 const history = ref([{ view: 'home' }])
 const current = computed(() => history.value[history.value.length - 1])
+
+// 记住上次所在页面（首页 / 练习 / 模拟考试）与科目，重开直接回到该页
+watch([current, studyMode], () => {
+  const view = current.value.view
+  store.lastView = { view, mode: view === 'study' ? studyMode.value : 'sequence' }
+})
+watch(subject, v => { store.subject = v })
 
 function toast(m){
   toastMsg.value = m
@@ -66,6 +73,11 @@ onMounted(async () => {
     toast('题库加载失败')
   }
   loaded.value = true
+
+  // 恢复上次的学习页面与科目（题库已加载完，直接渲染对应页面）
+  const lv = store.lastView
+  if(lv && lv.view === 'study'){ studyMode.value = lv.mode || 'sequence'; history.value = [{ view: 'home' }, { view: 'study' }] }
+  else if(lv && lv.view === 'exam'){ history.value = [{ view: 'home' }, { view: 'exam' }] }
 
   // 原生 APP：接管系统返回键与边缘左滑手势，走页内导航
   if(Capacitor.isNativePlatform()){
