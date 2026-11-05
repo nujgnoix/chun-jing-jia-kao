@@ -86,6 +86,7 @@ const idx = ref(0)
 const answers = ref({})       // id -> [letters]
 const timeLeft = ref(props.subject === 1 ? 45 * 60 : 30 * 60)
 let timer = null
+let finished = false          // 已交卷：不再续考，返回首页后重开是新卷
 const showResult = ref(false)
 const showConfirm = ref(false)
 const showCard = ref(false)
@@ -105,17 +106,54 @@ function shuffle(a){
   }
   return a
 }
+
+// 把当前考试状态写入 store（落盘由 store 的 watch 统一处理）
+function persist(){
+  if(finished) return
+  store.exam = {
+    subject: props.subject,
+    ids: list.value.map(qq => qq.id),
+    answers: answers.value,
+    idx: idx.value,
+    timeLeft: timeLeft.value
+  }
+}
+
 onMounted(() => {
   const total = props.subject === 1 ? 100 : 50
   const all = props.bank[props.subject] || []
-  list.value = shuffle([...all]).slice(0, total)
+  const saved = store.exam
+  // 有同科目的未完成考试 → 续考；否则开新卷
+  if(saved && saved.subject === props.subject && Array.isArray(saved.ids) && saved.ids.length){
+    const restored = saved.ids.map(id => all.find(qq => qq.id === id)).filter(Boolean)
+    if(restored.length === saved.ids.length && restored.length){
+      list.value = restored
+      idx.value = Math.min(saved.idx || 0, list.value.length - 1)
+      answers.value = saved.answers || {}
+      timeLeft.value = typeof saved.timeLeft === 'number' ? saved.timeLeft : (props.subject === 1 ? 45 * 60 : 30 * 60)
+    } else {
+      newExam(all, total)
+    }
+  } else {
+    newExam(all, total)
+  }
   startTimer()
 })
-onBeforeUnmount(() => clearInterval(timer))
+onBeforeUnmount(() => { clearInterval(timer); if(!finished) persist() })
+
+function newExam(all, total){
+  list.value = shuffle([...all]).slice(0, total)
+  idx.value = 0
+  answers.value = {}
+  timeLeft.value = props.subject === 1 ? 45 * 60 : 30 * 60
+  finished = false
+  persist()
+}
 
 function startTimer(){
   timer = setInterval(() => {
     timeLeft.value--
+    if(timeLeft.value % 10 === 0) persist()   // 每 10 秒落盘一次剩余时间
     if(timeLeft.value <= 0){ clearInterval(timer); submit() }
   }, 1000)
 }
@@ -147,18 +185,20 @@ function onPick(i){
     answers.value[id] = [l]
   }
   answers.value = { ...answers.value }
+  persist()
 }
 function prev(){
-  if(idx.value > 0){ idx.value--; scrollTop() }
+  if(idx.value > 0){ idx.value--; scrollTop(); persist() }
 }
 function next(){
-  if(idx.value < list.value.length - 1){ idx.value++; scrollTop() }
+  if(idx.value < list.value.length - 1){ idx.value++; scrollTop(); persist() }
   else toast('已经是最后一题，点右上角交卷')
 }
 function jumpTo(i){
   idx.value = i
   showCard.value = false
   scrollTop()
+  persist()
 }
 function gotoUnanswered(){
   const i = list.value.findIndex(qq => !isDone(qq.id))
@@ -180,6 +220,8 @@ function submit(){
     else store.wrong[qq.id] = true
   })
   score.value = Math.round(right / list.value.length * 100)
+  finished = true
+  store.exam = null   // 已交卷：清掉续考存档，下次进是新卷
   showResult.value = true
 }
 </script>
