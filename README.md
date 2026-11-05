@@ -10,7 +10,7 @@
 
 ### 📥 下载安卓 APK
 
-## [👉 点此下载 app-debug.apk（v1.0，约 57 MB）](https://github.com/nujgnoix/chun-jing-jia-kao/releases/download/apk-24/app-debug.apk)
+## [👉 点此下载 app-debug.apk（最新版，约 57 MB）](https://github.com/nujgnoix/chun-jing-jia-kao/releases/download/latest/app-debug.apk)
 
 [最新版入口](https://github.com/nujgnoix/chun-jing-jia-kao/releases/latest) · [Releases 页面](https://github.com/nujgnoix/chun-jing-jia-kao/releases)
 
