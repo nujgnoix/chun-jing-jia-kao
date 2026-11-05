@@ -123,9 +123,11 @@ onMounted(() => {
   const total = props.subject === 1 ? 100 : 50
   const all = props.bank[props.subject] || []
   const saved = store.exam
+  console.log('[EXAM] mount saved?', !!saved, 'subj', saved && saved.subject, 'idsLen', saved && saved.ids && saved.ids.length, 'allLen', all.length, 'idx', saved && saved.idx)
   // 有同科目的未完成考试 → 续考；否则开新卷
   if(saved && saved.subject === props.subject && Array.isArray(saved.ids) && saved.ids.length){
     const restored = saved.ids.map(id => all.find(qq => qq.id === id)).filter(Boolean)
+    console.log('[EXAM] restoredLen', restored.length, 'expected', saved.ids.length)
     if(restored.length === saved.ids.length && restored.length){
       list.value = restored
       idx.value = Math.min(saved.idx || 0, list.value.length - 1)
