@@ -57,7 +57,7 @@ import { ref, computed, onMounted, inject, nextTick } from 'vue'
 import { Capacitor } from '@capacitor/core'
 import { Share } from '@capacitor/share'
 import { Filesystem, Directory } from '@capacitor/filesystem'
-import { store, adjustFont } from '../store.js'
+import { store, adjustFont, getProgress, setProgress } from '../store.js'
 
 const props = defineProps({ mode: String, subject: Number, bank: Object })
 const emit = defineEmits(['back', 'home'])
@@ -87,8 +87,11 @@ function buildList(){
 
 onMounted(() => {
   list.value = buildList()
-  idx.value = 0
+  // 恢复上次看到第几题（按模式+科目记忆），越界则夹到合法范围
+  const saved = getProgress(props.mode, props.subject)
+  idx.value = Math.min(Math.max(0, saved), Math.max(0, list.value.length - 1))
   reset()
+  saveProgress()
 })
 
 function reset(){
@@ -98,9 +101,10 @@ function reset(){
   // 切题后回到题干顶部，避免停在上一题的解析处
   nextTick(() => { if(bodyEl.value) bodyEl.value.scrollTop = 0 })
 }
-function prev(){ if(idx.value > 0){ idx.value--; reset() } }
+function saveProgress(){ setProgress(props.mode, props.subject, idx.value) }
+function prev(){ if(idx.value > 0){ idx.value--; reset(); saveProgress() } }
 function next(){
-  if(idx.value < list.value.length - 1){ idx.value++; reset() }
+  if(idx.value < list.value.length - 1){ idx.value++; reset(); saveProgress() }
   else toast('已经是最后一题')
 }
 
